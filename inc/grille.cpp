@@ -2,6 +2,7 @@
 #include "cellule.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <thread>
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
@@ -96,6 +97,7 @@ Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur)
 
 void Grille::update()
 {
+    /*
     // Parcourir toute la grille
     // std::srand(std::time(0));
     // travailler sur une copie de la grille
@@ -117,7 +119,34 @@ void Grille::update()
     }
     // Update la carte
     grid = grid_;
+    */
+    int num_threads = 16; // Nombre de threads
+    int section_size = largeur / num_threads;
+    std::vector<std::thread> threads;
+    std::vector<std::vector<Cellule>> new_grid = grid;
+
+    for (int i = 0; i < num_threads; ++i) {
+        int x_start = i * section_size;
+        int x_end = (i == num_threads - 1) ? largeur : x_start + section_size;
+        threads.emplace_back(&Grille::update_section, this, x_start, x_end, std::ref(new_grid));
+    }
+
+    // Attendre la fin de tous les threads
+    for (auto& th : threads) {
+        th.join();
+    }
+
+    // Mettre à jour la grille principale
+    grid = new_grid;
 };
+
+void Grille::update_section(int x_start, int x_end, std::vector<std::vector<Cellule>>& new_grid) {
+    for (int x = x_start; x < x_end; ++x) {
+        for (int y = 0; y < longueur; ++y) {
+            new_grid[x][y].update_state(grid);
+        }
+    }
+}
 
 int Grille::get_largeur() const
 {

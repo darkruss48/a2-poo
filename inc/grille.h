@@ -8,7 +8,7 @@ class Grille{
     private:
         int longueur;
         int largeur;
-        std::vector<std::vector<Cellule>> grid; // Pointeur afin d'économiser la mémoire
+        std::vector<std::vector<Cellule>> grid;
     
     public:
         // Constructeur
@@ -22,6 +22,7 @@ class Grille{
         // }
         void update();
         void init();
+        void update_section(int x_start, int x_end, std::vector<std::vector<Cellule>>& new_grid);
         void render_grid(sf::RenderWindow &window);
         // Getters
         int get_longueur() const;

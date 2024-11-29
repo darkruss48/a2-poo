@@ -9,7 +9,7 @@
 #include "inc/fichier.h"
 
 // Paramètres de la grille
-const int cellSize = 5;
+const int cellSize = 7;
 const int gridWidth = 200;
 const int gridHeight = 200;
 
@@ -35,6 +35,7 @@ void mode_console(int argc, char* argv[])
             // Sauvegarder
             Fichier::sauvegarder_grille(*grille_, nom_fichier);
 
+            /*
             sf::RenderWindow window(sf::VideoMode(gridWidth * cellSize, gridHeight * cellSize), "Game of Life");
 
             while (window.isOpen()) {
@@ -46,7 +47,7 @@ void mode_console(int argc, char* argv[])
 
                 grille_->render_grid(window);
             }
-            
+            */
             // Libérer la mémoire allouée dynamiquement
             delete grille_;
 
@@ -110,6 +111,67 @@ void mode_reset(int argc, char* argv[])
     }
 }
 
+
+void mode_view(int argc, char* argv[])
+{
+    std::cout << "Mode view activé" << std::endl;
+    if (argc > 2) {
+        std::string nom_fichier = argv[2];
+        // Charger la grille
+        Grille* grille_ = Fichier::charger_grille(nom_fichier);
+        if (grille_) {
+            std::cout << "Initialisation de la grille ..." << std::endl;
+            auto& grid = grille_->get_grid();
+            std::cout << grid.size() << std::endl;
+            // Rendre la grille aléatoire, 1 cellule sur 2 allumée de manière random
+            std::srand(std::time(nullptr));
+            for (int i = 0; i < gridWidth; ++i) {
+                for (int j = 0; j < gridHeight; ++j) {
+                if (std::rand() % 2 == 0) {
+                    grid[i][j].set_state(true);
+                } else {
+                    grid[i][j].set_state(false);
+                }
+                }
+            }
+            std::cout << "Grille initialisée !" << std::endl;
+            std::cout << "Taille de la grid : " << grid[0][0].get_grille().get_grid().size() << " x " << grid[0][0].get_grille().get_grid().size() << std::endl;
+            // Calculer la population x fois
+            // for (int i = 0; i < nb_iterations; ++i) {
+            //     grille_->update();
+            // }
+
+            sf::RenderWindow window(sf::VideoMode(gridWidth * cellSize, gridHeight * cellSize), "Game of Life");
+
+            while (window.isOpen()) {
+                sf::Event event;
+                while (window.pollEvent(event)) {
+                    if (event.type == sf::Event::Closed)
+                        window.close();
+                }
+
+                grille_->render_grid(window);
+
+                grille_->update();
+            }
+
+            // Sauvegarder
+            // Fichier::sauvegarder_grille(*grille_, nom_fichier);
+
+            /*
+            
+            */
+            // Libérer la mémoire allouée dynamiquement
+            delete grille_;
+
+        } else {
+            std::cerr << "Erreur lors du chargement de la grille" << std::endl;
+        }
+    } else {
+        std::cerr << "Not enough arguments provided after --console" << std::endl;
+    }
+}
+
 int main(int argc, char* argv[]) {
     // Grille grille(gridWidth, gridHeight);
     // Sauvegarder la grille
@@ -121,6 +183,10 @@ int main(int argc, char* argv[]) {
         mode_window(argc, argv);
     } else if (argc > 1 && std::string(argv[1]) == "reset") {
         mode_reset(argc, argv);
+    } else if (argc > 1 && std::string(argv[1]) == "view") {
+        mode_view(argc, argv);
+    } else {
+        std::cerr << "Mode non reconnu" << std::endl;
     }
 
     return 0;

@@ -139,40 +139,31 @@ std::vector<Cellule> Cellule::check_coin()
 }
 }
 
-void Cellule::update_state(std::vector<std::vector<Cellule>>& grid_)
+void Cellule::update_state(const std::vector<std::vector<Cellule>>& grid_)
 {
-    // Vérifier si c'est vide --> pas danc un coin
-    std::vector<Cellule> adjacentCells = check_coin();
-    if (adjacentCells.size() == 0) {
-        for (int i = -1; i < 2; i++) {
-        for (int j = -1; j < 2; j++) {
-            if (i == 0 && j == 0) { // case centrale ; on l'oublie
+    int largeur = grid_.size();
+    int longueur = grid_[0].size();
+    int aliveNeighbors = 0;
+
+    // Calcul des voisins vivants
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            if (i == 0 && j == 0)
                 continue;
-            }
-            adjacentCells.push_back(grille->get_grid()[x+i][y+j]);
-            // std::cout << "VIDE" << std::endl;
+            int nx = (x + i + largeur) % largeur;
+            int ny = (y + j + longueur) % longueur;
+            if (grid_[nx][ny].get_state())
+                ++aliveNeighbors;
         }
     }
-    }
-    // std::cout << "b"<< std::endl;
-    // Checker si 3 des cases adjacentes sont en vie
-    int aliveNeighbors = std::count_if(adjacentCells.begin(), adjacentCells.end(), [](Cellule& cell) {
-    return cell.get_state() == 1;
-    });
-    // if (std::count(adjacentCells.begin(), adjacentCells.end(), 1) == 3) {
-    if (aliveNeighbors == 3) {
-        grid_[x][y] = Cellule(x, y, true, grille); // en vie
-    }
-    // else if (std::count(adjacentCells.begin(), adjacentCells.end(), 1) == 2) {} // change rien
-    else if (aliveNeighbors == 2) {} // change rien
-    else if (aliveNeighbors < 2 || aliveNeighbors > 3)  {
-    // else if (std::count(adjacentCells.begin(), adjacentCells.end(), 1) < 2 || std::count(adjacentCells.begin(), adjacentCells.end(), 1) > 3)  {
-        grid_[x][y] = Cellule(x, y, false, grille); // mort
-    }
-    else {
-        std::cout << "Problème, on passe a la suite" << std::endl;
-        // Afficher emplacement + nb calculée
-        std::cout << "x: " << x << " y: " << y << " nb: " << aliveNeighbors << std::endl;
+
+    // Application des règles du jeu de la vie
+    if (state) {
+        if (aliveNeighbors < 2 || aliveNeighbors > 3)
+            state = false;
+    } else {
+        if (aliveNeighbors == 3)
+            state = true;
     }
 }
 

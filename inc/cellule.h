@@ -15,7 +15,7 @@ class Cellule
     public:
         // Constructeur
         Cellule(int x, int y, bool state, Grille* grid);
-        void update_state(std::vector<std::vector<Cellule>>& grid_);
+        void update_state(const std::vector<std::vector<Cellule>>& grid);
         int get_state() const;
         void set_state(bool state);
         Grille get_grille();

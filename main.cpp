@@ -8,6 +8,8 @@
 #include "inc/cellule.h"
 #include "inc/fichier.h"
 #include "inc/bouton.h"
+#include "inc/slidebar.h"
+#include "inc/initialiser.h"
 
 // Paramètres de la grille
 const float cellSize = 7;
@@ -90,7 +92,6 @@ void mode_window(int argc, char* argv[])
     if (argc > 2) {
         std::string nom_fichier = argv[2];
         Grille* grille_ = Fichier::charger_grille(nom_fichier);
-        Fichier::sauvegarder_grille(*grille_, "testlol");
         if (grille_) {
             std::cout << "Initialisation de la grille ..." << std::endl;
             auto& grid = grille_->get_grid();
@@ -120,6 +121,21 @@ void mode_window(int argc, char* argv[])
             int buttonYPosition = grille_->get_longueur() * cellSize + (buttonAreaHeight - 50) / 2; // 50 est la hauteur du bouton
             Button bouton_pause(10, buttonYPosition, 200, 50, a);
 
+            // ... après la création du bouton pause
+            int slideBarX = bouton_pause.getButtonShape().getPosition().x + bouton_pause.getButtonShape().getSize().x + 20; // 20 pixels d'écart
+            int slideBarY = bouton_pause.getButtonShape().getPosition().y;
+            int slideBarWidth = 300; // Un peu plus longue que le bouton
+            int slideBarHeight = 30 ;// bouton_pause.getButtonShape().getSize().y;
+
+            int minDelay = 0;    // Valeur minimale du délai
+            int maxDelay = 1000;  // Valeur maximale du délai
+            int initialDelay = 100; // Valeur initiale du délai
+
+            SlideBar slideBar(slideBarX, slideBarY, slideBarWidth, slideBarHeight, minDelay, maxDelay, initialDelay);
+
+            int delay = slideBar.getValue(); 
+            static sf::Clock clock;
+
             while (window.isOpen()) {
                 // attendre 30 secondes
                 sf::Event event;
@@ -130,11 +146,20 @@ void mode_window(int argc, char* argv[])
 
                 handleButtonClick(window, bouton_pause);
 
+                // Gérer les interactions avec la SlideBar
+                slideBar.handleEvent(window, event);
+
+                // Récupérer la valeur du délai depuis la SlideBar
+                delay = slideBar.getValue();
+
                 window.clear();
 
                 // Mettre à jour la grille seulement si le jeu n'est pas en pause
                 if (!bouton_pause.getPause()) {
-                    grille_->update();
+                    if (clock.getElapsedTime().asMilliseconds() >= delay) {
+                        grille_->update();
+                        clock.restart();
+                    }
                 }
 
                 // Rendre la grille
@@ -142,6 +167,7 @@ void mode_window(int argc, char* argv[])
 
                 // Afficher le bouton en bas de la fenêtre
                 bouton_pause.render(window);
+                slideBar.render(window);
 
                 window.display(); // Appel unique à window.display()
             }
@@ -162,21 +188,57 @@ void mode_window(int argc, char* argv[])
 void mode_reset(int argc, char* argv[])
 {
     std::cout << "Mode reset activé" << std::endl;
-    if (argc > 2) {
+    if (argc > 5) {
         std::string nom_fichier = argv[2];
-        // Grille* grille_ = Fichier::charger_grille(nom_fichier);
-        Grille grille(gridWidth, gridHeight);
-        std::cout << "Initialisation de la grille ..." << std::endl;
-        auto& grid = grille.get_grid();
-        std::cout << grid.size() << std::endl;
-        std::cout << "Grille initialisée !" << std::endl;
-        std::cout << "Taille de la grille : " << grid[0][0].get_grille().get_grid().size() << " x " << grid[0][0].get_grille().get_grid().size() << std::endl;
-        // Reset                
-        Fichier::sauvegarder_grille(grille, nom_fichier);
-        std::cout << "Grille réinitialisée !" << std::endl;
+        std::string quoi_generer = argv[3];
+        int longueur = std::stoi(argv[4]);
+        int largeur = std::stoi(argv[5]);
 
+        if (longueur < 40 || largeur < 40) {
+            std::cerr << "Les dimensions doivent être au minimum de 40x40" << std::endl;
+            return;
+        }
+
+        Grille grille(largeur, longueur);
+        std::cout << "Initialisation de la grille..." << std::endl;
+
+        Initialiser initialiser;
+
+        if (quoi_generer == "glider") {
+            initialiser.genererGlider(grille, 0, 0);
+        } else if (quoi_generer == "canon") {
+            initialiser.genererCanonGlider(grille, 10, 10);
+        } else if (quoi_generer == "aleatoire") {
+            initialiser.genererAleatoire(grille, 0.5); // Probabilité de 50%
+        } else {
+            std::cerr << "Type de génération non reconnu" << std::endl;
+            return;
+        }
+
+        Fichier::sauvegarder_grille(grille, nom_fichier);
+        std::cout << "Grille générée et sauvegardée avec succès !" << std::endl;
+
+    } else {
+        std::cerr << "Usage : ./prog reset <nom_fichier> <quoi_generer> <longueur> <largeur>" << std::endl;
     }
 }
+// {
+//     std::cout << "Mode reset activé" << std::endl;
+//     if (argc > 2) {
+//         std::string nom_fichier = argv[2];
+//         // Grille* grille_ = Fichier::charger_grille(nom_fichier);
+//         Grille grille(gridWidth, gridHeight);
+//         std::cout << "Initialisation de la grille ..." << std::endl;
+//         auto& grid = grille.get_grid();
+//         std::cout << grid.size() << std::endl;
+//         std::cout << "Grille initialisée !" << std::endl;
+//         std::cout << "Taille de la grille : " << grid[0][0].get_grille().get_grid().size() << " x " << grid[0][0].get_grille().get_grid().size() << std::endl;
+//         // Reset                
+//         Fichier::sauvegarder_grille(grille, nom_fichier);
+//         std::cout << "Grille réinitialisée !" << std::endl;
+
+//     }
+// }
 
 void mode_view(int argc, char* argv[])
 {
@@ -217,6 +279,21 @@ void mode_view(int argc, char* argv[])
             int buttonYPosition = gridHeight * cellSize + (buttonAreaHeight - 50) / 2; // 50 est la hauteur du bouton
             Button bouton_pause(10, buttonYPosition, 200, 50, a);
 
+            // ... après la création du bouton pause
+            int slideBarX = bouton_pause.getButtonShape().getPosition().x + bouton_pause.getButtonShape().getSize().x + 20; // 20 pixels d'écart
+            int slideBarY = bouton_pause.getButtonShape().getPosition().y;
+            int slideBarWidth = 300; // Un peu plus longue que le bouton
+            int slideBarHeight = 30 ;// bouton_pause.getButtonShape().getSize().y;
+
+            int minDelay = 0;    // Valeur minimale du délai
+            int maxDelay = 1000;  // Valeur maximale du délai
+            int initialDelay = 100; // Valeur initiale du délai
+
+            SlideBar slideBar(slideBarX, slideBarY, slideBarWidth, slideBarHeight, minDelay, maxDelay, initialDelay);
+
+            int delay = slideBar.getValue(); 
+            static sf::Clock clock;
+
             while (window.isOpen()) {
                 // attendre 30 ms
                 sf::Event event;
@@ -227,7 +304,21 @@ void mode_view(int argc, char* argv[])
 
                 handleButtonClick(window, bouton_pause);
 
+                // Gérer les interactions avec la SlideBar
+                slideBar.handleEvent(window, event);
+
+                // Récupérer la valeur du délai depuis la SlideBar
+                delay = slideBar.getValue();
+
                 window.clear();
+
+                // Mettre à jour la grille seulement si le jeu n'est pas en pause
+                if (!bouton_pause.getPause()) {
+                    if (clock.getElapsedTime().asMilliseconds() >= delay) {
+                        grille_->update();
+                        clock.restart();
+                    }
+                }
 
                 // Mettre à jour la grille seulement si le jeu n'est pas en pause
                 if (!bouton_pause.getPause()) {
@@ -236,6 +327,7 @@ void mode_view(int argc, char* argv[])
 
                 // Rendre la grille
                 grille_->render_grid(window);
+                slideBar.render(window);
 
                 // Afficher le bouton en bas de la fenêtre
                 bouton_pause.render(window);

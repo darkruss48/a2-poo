@@ -11,6 +11,10 @@ g++ borderless.cpp -o prog -lsfml-graphics -lsfml-window -lsfml-system
 
 ('prog' peut être changé par le nom de l'executable souhaité)
 
+
+######################
+Ce test unitaire sur la grille torique initialise une grille avec un planeur.
+
 "
 */
 
@@ -23,8 +27,8 @@ g++ borderless.cpp -o prog -lsfml-graphics -lsfml-window -lsfml-system
 #include <iostream>
 
 const int cellSize = 10;
-const int gridWidth = 40;
-const int gridHeight = 40;
+const int gridWidth = 80;
+const int gridHeight = 35;
 
 std::vector<std::vector<int>> grid(gridWidth, std::vector<int>(gridHeight));
 
@@ -41,48 +45,6 @@ void initializeGrid() {
     grid[10][12] = 1;
     grid[11][12] = 1;
     grid[12][12] = 1;
-    // Canon à planeurs (Gosper Glider Gun)
-    /*
-    grid[1][5] = 1;
-    grid[1][6] = 1;
-    grid[2][5] = 1;
-    grid[2][6] = 1;
-
-    grid[11][5] = 1;
-    grid[11][6] = 1;
-    grid[11][7] = 1;
-    grid[12][4] = 1;
-    grid[12][8] = 1;
-    grid[13][3] = 1;
-    grid[13][9] = 1;
-    grid[14][3] = 1;
-    grid[14][9] = 1;
-    grid[15][6] = 1;
-    grid[16][4] = 1;
-    grid[16][8] = 1;
-    grid[17][5] = 1;
-    grid[17][6] = 1;
-    grid[17][7] = 1;
-    grid[18][6] = 1;
-
-    grid[21][3] = 1;
-    grid[21][4] = 1;
-    grid[21][5] = 1;
-    grid[22][3] = 1;
-    grid[22][4] = 1;
-    grid[22][5] = 1;
-    grid[23][2] = 1;
-    grid[23][6] = 1;
-    grid[25][1] = 1;
-    grid[25][2] = 1;
-    grid[25][6] = 1;
-    grid[25][7] = 1;
-
-    grid[35][3] = 1;
-    grid[35][4] = 1;
-    grid[36][3] = 1;
-    grid[36][4] = 1;
-    */
 }
 
 std::vector<int> check_coin(int x, int y)

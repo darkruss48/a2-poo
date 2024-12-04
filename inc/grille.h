@@ -4,10 +4,10 @@
 #include "cellule.h"
 #pragma once
 
-class Grille{
+class Grille {
     private:
-        int longueur;
-        int largeur;
+        int largeur;  // Nombre de colonnes
+        int longueur; // Nombre de lignes
         std::vector<std::vector<Cellule>> grid;
     
     public:
@@ -21,7 +21,6 @@ class Grille{
         //     }
         // }
         void update();
-        void init();
         void update_section(int x_start, int x_end, std::vector<std::vector<Cellule>>& new_grid);
         void render_grid(sf::RenderWindow &window);
         // Getters

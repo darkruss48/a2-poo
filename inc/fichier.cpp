@@ -12,7 +12,7 @@ void Fichier::sauvegarder_grille(Grille& grille, const std::string& nom_fichier)
         const auto& grid = grille.get_grid();
         for (int y = 0; y < longueur; ++y) {
             for (int x = 0; x < largeur; ++x) {
-                fichier << grid[x][y].get_state() << " ";
+                fichier << grid[y][x].get_state() << " ";
             }
             fichier << std::endl;
         }
@@ -27,15 +27,16 @@ Grille* Fichier::charger_grille(const std::string& nom_fichier) {
     if (fichier.is_open()) {
         int longueur, largeur;
         fichier >> longueur >> largeur;
+        std::cout << "Longueur : " << longueur << " Largeur : " << largeur << std::endl;
         Grille* grille = new Grille(longueur, largeur);
-        grille->init();
+        // grille->init();
         auto& grid = grille->get_grid();
         std::cout << "Taille de la grille : " << grid.size() << " x " << grid[0].size() << std::endl;
         for (int y = 0; y < longueur; ++y) {
             for (int x = 0; x < largeur; ++x) {
                 int state;
                 fichier >> state;
-                grid[x][y].set_state(state == 1);
+                grid[y][x].set_state(state == 1);
             }
         }
         fichier.close();

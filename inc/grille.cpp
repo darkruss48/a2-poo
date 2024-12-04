@@ -9,7 +9,7 @@
 
 const int cellSize = 7;
 
-Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur) {
+Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur){
     /*
     Explication :
 
@@ -23,23 +23,16 @@ Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur)
     Vous contrôlez exactement comment et quand chaque Cellule est construite.
     Pas de risque d'avoir des Cellule avec des pointeurs grille non initialisés.
     */
-    // Redimensionner le vecteur principal pour contenir 'largeur' colonnes
-    this->longueur = longueur;
+    // Réserver de l'espace pour 'longueur' lignes
     this->largeur = largeur;
-
-    // Réserver de l'espace pour 'largeur' colonnes
-    grid.reserve(largeur);
-
-    for (int x = 0; x < largeur; ++x) {
-        // Créer une nouvelle ligne
+    this->longueur = longueur;
+    grid.reserve(longueur);
+    for (int y = 0; y < longueur; ++y) {
         std::vector<Cellule> row;
-        row.reserve(longueur);
-
-        for (int y = 0; y < longueur; ++y) {
+        row.reserve(largeur);
+        for (int x = 0; x < largeur; ++x) {
             row.emplace_back(x, y, false, this);
         }
-
-        // Ajouter la ligne à la grille
         grid.push_back(std::move(row));
     }
     // Vaisseau de base
@@ -52,7 +45,7 @@ Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur)
     grid[12][12] = 1;
     */
     // Canon à planeurs (Gosper Glider Gun)
-    ///*
+    /*
     grid[1][5] = Cellule(1, 5, true, this);
     grid[1][6] = Cellule(1, 6, true, this);
     grid[2][5] = Cellule(2, 5, true, this);
@@ -92,58 +85,32 @@ Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur)
     grid[35][4] = Cellule(35, 4, true, this);
     grid[36][3] = Cellule(36, 3, true, this);
     grid[36][4] = Cellule(36, 4, true, this);
-    //*/    
+    */    
 }
 
-void Grille::update()
-{
-    /*
-    // Parcourir toute la grille
-    // std::srand(std::time(0));
-    // travailler sur une copie de la grille
-    std::vector<std::vector<Cellule>> grid_ = grid;
-    for (int x = 0; x < largeur; ++x) {
-        for (int y = 0; y < largeur; ++y) {
-            // check si 3 des cases adjacentes sont en vie, dans ce cas elle est en vie
-            // Stocker de grid[x-1][y-1] jusqu'a grid[x+1][y+1]
-            
-            // Check si c'est une bordure
-            // std::cout << "a"<< std::endl;
-            grid[x][y].update_state(grid_);
-            // std::cout << "Cellule " << x << " " << y << " mise à jour" << std::endl;
-            // std::cout << adjacentCells.size() << std::endl;
-            // std::cout << "b"<< std::endl;
-
-
-        }
-    }
-    // Update la carte
-    grid = grid_;
-    */
+void Grille::update() {
     int num_threads = 16; // Nombre de threads
-    int section_size = largeur / num_threads;
+    int section_size = longueur / num_threads;
     std::vector<std::thread> threads;
     std::vector<std::vector<Cellule>> new_grid = grid;
 
     for (int i = 0; i < num_threads; ++i) {
-        int x_start = i * section_size;
-        int x_end = (i == num_threads - 1) ? largeur : x_start + section_size;
-        threads.emplace_back(&Grille::update_section, this, x_start, x_end, std::ref(new_grid));
+        int y_start = i * section_size;
+        int y_end = (i == num_threads - 1) ? longueur : y_start + section_size;
+        threads.emplace_back(&Grille::update_section, this, y_start, y_end, std::ref(new_grid));
     }
 
-    // Attendre la fin de tous les threads
     for (auto& th : threads) {
         th.join();
     }
 
-    // Mettre à jour la grille principale
     grid = new_grid;
-};
+}
 
-void Grille::update_section(int x_start, int x_end, std::vector<std::vector<Cellule>>& new_grid) {
-    for (int x = x_start; x < x_end; ++x) {
-        for (int y = 0; y < longueur; ++y) {
-            new_grid[x][y].update_state(grid);
+void Grille::update_section(int y_start, int y_end, std::vector<std::vector<Cellule>>& new_grid) {
+    for (int y = y_start; y < y_end; ++y) {
+        for (int x = 0; x < largeur; ++x) {
+            new_grid[y][x].update_state(grid);
         }
     }
 }
@@ -163,15 +130,14 @@ void Grille::render_grid(sf::RenderWindow &window) {
     
     window.clear();
     sf::RectangleShape cell(sf::Vector2f(cellSize - 1.0f, cellSize - 1.0f));
-    for (x = 0; x < largeur; ++x) {
-        for (y = 0; y < longueur; ++y) {
-            if (grid[x][y].get_state() == 1) {
+    for (int y = 0; y < longueur; ++y) {
+        for (int x = 0; x < largeur; ++x) {
+            if (grid[y][x].get_state() == 1) {
                 cell.setPosition(x * cellSize, y * cellSize);
                 window.draw(cell);
             }
         }
     }
-    window.display();
 }
 
 std::vector<std::vector<Cellule>>& Grille::get_grid()

@@ -16,9 +16,12 @@ void Fichier::sauvegarder_grille(Grille& grille, const std::string& nom_fichier)
             for (int x = 0; x < largeur; ++x) {
                 Cellule* cellule = grid[y][x];
                 if (typeid(*cellule) == typeid(CelluleObstacle)) {
+                    std::cout << "Obstacle détecté !" << std::endl;
                     CelluleObstacle* obstacle = dynamic_cast<CelluleObstacle*>(cellule);
                     fichier << (obstacle->get_state() ? "@ " : "# ");
                 } else {
+                    // std::cout << typeid(*cellule).name() << std::endl;
+                    // std::cout << typeid(CelluleObstacle).name() << std::endl;
                     fichier << (cellule->get_state() ? "1 " : "0 ");
                 }
             }

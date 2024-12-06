@@ -1,0 +1,25 @@
+4 tests unitaires par "Extensions" :
+
+- Grille torique
+- Cellule obstacle
+- Initialisation de grille pré-programmés
+- Parralélisation (1 seul test)
+
+Grille torique
+Ces tests unitaires permettent de vérifier la nature "borderless" (en français - "sans bordures") du jeu de la vie.
+Autrement dit, lorsqu'une cellule se trouve tout en bas à gauche, elle va rentrer en compte lors de la
+vérification des cellules adjacentes tout en haut à droite.
+
+1/ - Le test "borderless1" vérifie le fonctionnement de la grille torique sur une grille vide.
+  Résultat : le programme ne crash pas, et la grille est bel est bien vide. Test réussi
+
+2/ - Le test "borderless2" vérifie le fonctionnement de la grille torique sur une grille complètement remplie.
+  Résultat : le programme ne crash pas, et toutes les cellules meurent dès le prochain calcul de population.
+Le test "borderless3" vérifie le fonctionnement de la grille torique sur une grille avec un simple planeur.
+Le test "borderless4" vérifie le fonctionnement de la grille torique sur une grille avec des "toupies" en bordure.
+
+
+
+
+
+Cellule obstacle

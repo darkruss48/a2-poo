@@ -41,13 +41,16 @@ void Initialiser::genererAleatoire(Grille& grille, double probabilite) {
     for (int y = 0; y < grille.get_longueur(); ++y) {
         for (int x = 0; x < grille.get_largeur(); ++x) {
             double randValue = static_cast<double>(rand()) / RAND_MAX;
-            if (randValue < 0.001) { // 1 chance sur 20
-                bool state = rand() % 2;
-                grid[y][x] = new CelluleObstacle(x, y, state, &grille);
-            } else {
-                bool state = (rand() / static_cast<double>(RAND_MAX)) < probabilite;
-                grid[y][x] = new Cellule(x, y, state, &grille);
-            }
+            // if (randValue < 0.001) { // 1 chance sur 20
+            //     bool state = rand() % 2;
+            //     grid[y][x] = new CelluleObstacle(x, y, state, &grille);
+            //     std::cout << "Obstacle généré !" << std::endl;
+            // } else {
+            //     bool state = (rand() / static_cast<double>(RAND_MAX)) < probabilite;
+            //     grid[y][x] = new Cellule(x, y, state, &grille);
+            // }
+            bool state = rand() % 2;
+            grid[y][x] = new Cellule(x, y, state, &grille);
         }
     }
 

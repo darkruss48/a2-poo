@@ -16,6 +16,8 @@ void Initialiser::genererGlider(Grille& grille, int x, int y) {
     for (auto& pos : positions) {
         grid[pos[0]][pos[1]]->set_state(1);
     }
+    // mettre l'element [8][8] en tant que cellule obstacle vivante
+    grid[8][8] = new CelluleObstacle(8, 8, true, &grille);
 }
 
 void Initialiser::genererCanonGlider(Grille& grille, int x, int y) {
@@ -44,6 +46,7 @@ void Initialiser::genererAleatoire(Grille& grille, double probabilite) {
             if (randValue < 0.001) { // 1 chance sur 20
                 bool state = rand() % 2;
                 grid[y][x] = new CelluleObstacle(x, y, state, &grille);
+                std::cout << "Obstacle généré !" << std::endl;
             } else {
                 bool state = (rand() / static_cast<double>(RAND_MAX)) < probabilite;
                 grid[y][x] = new Cellule(x, y, state, &grille);

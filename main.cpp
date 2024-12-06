@@ -10,6 +10,7 @@
 #include "inc/bouton.h"
 #include "inc/slidebar.h"
 #include "inc/initialiser.h"
+#include "inc/celluleobstacle.h"
 
 // Paramètres de la grille
 const float cellSize = 7;
@@ -22,6 +23,29 @@ sf::Font font;
 const std::string a = "crampte";
 
 // Button bouton_pause(10, 10, 100, 50, a);
+
+
+#include <thread>
+#include <chrono>
+
+// Fonction pour afficher la grille dans la console
+void afficher_grille_console(Grille& grille) {
+    auto& grid = grille.get_grid();
+    int longueur = grille.get_longueur();
+    int largeur = grille.get_largeur();
+
+    for (int y = 0; y < longueur; ++y) {
+        for (int x = 0; x < largeur; ++x) {
+            Cellule* cellule = grid[y][x];
+            if (CelluleObstacle* obstacle = dynamic_cast<CelluleObstacle*>(cellule)) {
+                std::cout << (obstacle->get_state() ? "@ " : "# ");
+            } else {
+                std::cout << (cellule->get_state() ? "1 " : "0 ");
+            }
+        }
+        std::cout << std::endl;
+    }
+}
 
 
 void handleButtonClick(sf::RenderWindow& window, Button& bouton_pause) {
@@ -39,8 +63,42 @@ void handleButtonClick(sf::RenderWindow& window, Button& bouton_pause) {
     }
 }
 
+void mode_console(int argc, char* argv[]) {
+    std::cout << "Mode console activé" << std::endl;
+    if (argc > 4) {
+        int nb_iterations = std::stoi(argv[2]);
+        std::string nom_fichier = argv[3];
+        int delai_ms = std::stoi(argv[4]); // Délai en millisecondes
 
-void mode_console(int argc, char* argv[])
+        // Charger la grille
+        Grille* grille_ = Fichier::charger_grille(nom_fichier);
+        if (grille_) {
+            std::cout << "Grille chargée avec succès." << std::endl;
+
+            for (int iteration = 1; iteration <= nb_iterations; ++iteration) {
+                std::cout << "======== Itération " << iteration << "/" << nb_iterations << " ========" << std::endl;
+
+                // Afficher la grille
+                afficher_grille_console(*grille_);
+
+                // Mettre à jour la grille pour la prochaine itération
+                grille_->update();
+
+                // Attendre le délai spécifié
+                std::this_thread::sleep_for(std::chrono::milliseconds(delai_ms));
+            }
+
+            delete grille_;
+        } else {
+            std::cerr << "Erreur : impossible de charger la grille depuis le fichier " << nom_fichier << std::endl;
+        }
+    } else {
+        std::cerr << "Usage : ./prog console <nombre_itérations> <nom_fichier> <délai_en_ms>" << std::endl;
+    }
+}
+
+
+void _mode_console(int argc, char* argv[])
 
 {
     std::cout << "Mode console activé" << std::endl;
@@ -194,19 +252,22 @@ void mode_reset(int argc, char* argv[])
         int longueur = std::stoi(argv[4]);
         int largeur = std::stoi(argv[5]);
 
-        if (longueur < 40 || largeur < 40) {
-            std::cerr << "Les dimensions doivent être au minimum de 40x40" << std::endl;
-            return;
-        }
-
         Grille grille(largeur, longueur);
         std::cout << "Initialisation de la grille..." << std::endl;
 
         Initialiser initialiser;
 
         if (quoi_generer == "glider") {
+            if (longueur < 5 || largeur < 5) {
+                std::cerr << "Les dimensions doivent être au minimum de 5x5" << std::endl;
+                return;
+            }
             initialiser.genererGlider(grille, 0, 0);
         } else if (quoi_generer == "canon") {
+            if (longueur < 40 || largeur < 40) {
+                std::cerr << "Les dimensions doivent être au minimum de 40x40" << std::endl;
+                return;
+            }
             initialiser.genererCanonGlider(grille, 10, 10);
         } else if (quoi_generer == "aleatoire") {
             initialiser.genererAleatoire(grille, 0.5); // Probabilité de 50%

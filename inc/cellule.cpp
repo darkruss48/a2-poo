@@ -14,7 +14,7 @@ Cellule::Cellule(int x, int y, bool state, Grille* grid)
     this->grille = grid;
 }
 
-void Cellule::update_state(const std::vector<std::vector<Cellule>>& grid_) {
+void Cellule::update_state(const std::vector<std::vector<Cellule*>>& grid_) {
     int longueur = grid_.size();          // Nombre de lignes
     int largeur = grid_[0].size();        // Nombre de colonnes
     int aliveNeighbors = 0;
@@ -26,7 +26,7 @@ void Cellule::update_state(const std::vector<std::vector<Cellule>>& grid_) {
             int nx = (x + i + largeur) % largeur;
             if (i == 0 && j == 0)
                 continue;
-            if (grid_[ny][nx].get_state())
+            if (grid_[ny][nx]->get_state())
                 ++aliveNeighbors;
         }
     }

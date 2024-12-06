@@ -2,6 +2,7 @@
 #include "cellule.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "celluleobstacle.h"
 #include <thread>
 #include <ctime>
 #include <cstdlib>
@@ -26,15 +27,22 @@ Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur)
     // Réserver de l'espace pour 'longueur' lignes
     this->largeur = largeur;
     this->longueur = longueur;
-    grid.reserve(longueur);
+    grid.resize(longueur);
     for (int y = 0; y < longueur; ++y) {
-        std::vector<Cellule> row;
-        row.reserve(largeur);
+        grid[y].resize(largeur);
         for (int x = 0; x < largeur; ++x) {
-            row.emplace_back(x, y, false, this);
+            grid[y][x] = new Cellule(x, y, false, this);
         }
-        grid.push_back(std::move(row));
     }
+    // grid.reserve(longueur);
+    // for (int y = 0; y < longueur; ++y) {
+    //     std::vector<Cellule> row;
+    //     row.reserve(largeur);
+    //     for (int x = 0; x < largeur; ++x) {
+    //         row.emplace_back(x, y, false, this);
+    //     }
+    //     grid.push_back(std::move(row));
+    // }
     // Vaisseau de base
     // Vaisseau de base (Glider)
     /*
@@ -88,12 +96,32 @@ Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur)
     */    
 }
 
+
+Grille::~Grille() {
+    //  for (int y = 0; y < longueur; ++y) {
+         // for (int x = 0; x < largeur; ++x) {
+             // delete grid[y][x];
+         // }
+    //  }
+}
+
+
 void Grille::update() {
     int num_threads = 16; // Nombre de threads
     int section_size = longueur / num_threads;
     std::vector<std::thread> threads;
-    std::vector<std::vector<Cellule>> new_grid = grid;
-
+    std::vector<std::vector<Cellule*>> new_grid(longueur, std::vector<Cellule*>(largeur));
+    // deep copy de new_grid, afin d'éviter de travailler sur grid
+    for (int y = 0; y < longueur; ++y) {
+        for (int x = 0; x < largeur; ++x) {
+            if (CelluleObstacle* obstacle = dynamic_cast<CelluleObstacle*>(grid[y][x])) {
+                new_grid[y][x] = new CelluleObstacle(*obstacle);
+            } else {
+                new_grid[y][x] = new Cellule(*grid[y][x]);
+            }
+        }
+    }
+    // fin deep copy
     for (int i = 0; i < num_threads; ++i) {
         int y_start = i * section_size;
         int y_end = (i == num_threads - 1) ? longueur : y_start + section_size;
@@ -107,10 +135,10 @@ void Grille::update() {
     grid = new_grid;
 }
 
-void Grille::update_section(int y_start, int y_end, std::vector<std::vector<Cellule>>& new_grid) {
+void Grille::update_section(int y_start, int y_end, std::vector<std::vector<Cellule*>>& new_grid) {
     for (int y = y_start; y < y_end; ++y) {
         for (int x = 0; x < largeur; ++x) {
-            new_grid[y][x].update_state(grid);
+            new_grid[y][x]->update_state(grid);
         }
     }
 }
@@ -132,15 +160,32 @@ void Grille::render_grid(sf::RenderWindow &window) {
     sf::RectangleShape cell(sf::Vector2f(cellSize - 1.0f, cellSize - 1.0f));
     for (int y = 0; y < longueur; ++y) {
         for (int x = 0; x < largeur; ++x) {
-            if (grid[y][x].get_state() == 1) {
+            // verifier que la cellule est un obstacle
+            if (CelluleObstacle* obstacle = dynamic_cast<CelluleObstacle*>(grid[y][x])) {
                 cell.setPosition(x * cellSize, y * cellSize);
+                if (grid[y][x]->get_state() == 1) {
+                    cell.setFillColor(sf::Color::Green);
+                } else {
+                    cell.setFillColor(sf::Color::Red);
+                }
+                window.draw(cell);
+            } else {
+                if (grid[y][x]->get_state() == 1) {
+                    cell.setPosition(x * cellSize, y * cellSize);
+                cell.setFillColor(grid[y][x]->get_state() ? sf::Color::White : sf::Color::Black);
                 window.draw(cell);
             }
+            }
+            // window.draw(cell);
+            // if (grid[y][x]->get_state() == 1) {
+            //     cell.setPosition(x * cellSize, y * cellSize);
+            //     window.draw(cell);
+            // }
         }
     }
 }
 
-std::vector<std::vector<Cellule>>& Grille::get_grid()
+std::vector<std::vector<Cellule*>>& Grille::get_grid()
 {
     // std::cout << "Taille de la GRILLE : " << grid.size() << " x " << grid[0].size() << std::endl;
     return grid;

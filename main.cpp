@@ -54,7 +54,7 @@ void mode_console(int argc, char* argv[])
             auto& grid = grille_->get_grid();
             std::cout << grid.size() << std::endl;
             std::cout << "Grille initialisée !" << std::endl;
-            std::cout << "Taille de la grid : " << grid[0][0].get_grille().get_grid().size() << " x " << grid[0][0].get_grille().get_grid().size() << std::endl;
+            std::cout << "Taille de la grid : " << grid[0][0]->get_grille().get_grid().size() << " x " << grid[0][0]->get_grille().get_grid().size() << std::endl;
             // Calculer la population x fois
             for (int i = 0; i < nb_iterations; ++i) {
                 grille_->update();
@@ -102,7 +102,7 @@ void mode_window(int argc, char* argv[])
             int nb_eteinte = 0;
             for (int y = 0; y < grille_->get_longueur(); ++y) {
                 for (int x = 0; x < grille_->get_largeur(); ++x) {
-                    if (grid[y][x].get_state() == 1) {
+                    if (grid[y][x]->get_state() == 1) {
                         nb_alive++;
                     } else {
                         nb_eteinte++;
@@ -111,7 +111,7 @@ void mode_window(int argc, char* argv[])
             }
             std::cout << "Nombre de cellules allumées : " << nb_alive << std::endl;
             std::cout << "Nombre de cellules éteintes : " << nb_eteinte << std::endl;
-            std::cout << "Taille de la grille : " << grid[0][0].get_grille().get_grid().size() << " x " << grid[0][0].get_grille().get_grid().size() << std::endl;
+            std::cout << "Taille de la grille : " << grid[0][0]->get_grille().get_grid().size() << " x " << grid[0][0]->get_grille().get_grid().size() << std::endl;
             std::cout << "Taille de la grille : " << grille_->get_largeur() << " x " << grille_->get_longueur() << std::endl;
             // Afficher
 
@@ -257,14 +257,14 @@ void mode_view(int argc, char* argv[])
             for (int y = 0; y < gridHeight; ++y) {
                 for (int x = 0; x < gridWidth; ++x) {
                     if (std::rand() % 2 == 0) {
-                        grid[y][x].set_state(true);
+                        grid[y][x]->set_state(true);
                     } else {
-                        grid[y][x].set_state(false);
+                        grid[y][x]->set_state(false);
                     }
                 }
             }
             std::cout << "Grille initialisée !" << std::endl;
-            std::cout << "Taille de la grid : " << grid[0][0].get_grille().get_grid().size() << " x " << grid[0][0].get_grille().get_grid().size() << std::endl;
+            std::cout << "Taille de la grid : " << grid[0][0]->get_grille().get_grid().size() << " x " << grid[0][0]->get_grille().get_grid().size() << std::endl;
             // Calculer la population x fois
             // for (int i = 0; i < nb_iterations; ++i) {
             //     grille_->update();
@@ -363,8 +363,8 @@ int main(int argc, char* argv[]) {
         mode_window(argc, argv);
     } else if (argc > 1 && std::string(argv[1]) == "reset") {
         mode_reset(argc, argv);
-    } else if (argc > 1 && std::string(argv[1]) == "view") {
-        mode_view(argc, argv);
+    // } else if (argc > 1 && std::string(argv[1]) == "view") {
+    //     mode_view(argc, argv);
     } else {
         std::cerr << "Mode non reconnu" << std::endl;
     }

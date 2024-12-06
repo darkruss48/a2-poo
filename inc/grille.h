@@ -4,6 +4,8 @@
 #include "cellule.h"
 #pragma once
 
+
+
 class Grille {
     private:
         int largeur;  // Nombre de colonnes
@@ -11,6 +13,7 @@ class Grille {
         std::vector<std::vector<Cellule*>> grid;
     
     public:
+        static float cellSize;
         // Constructeur
         Grille() : longueur(0), largeur(0) {}
         Grille(int longueur, int largeur);

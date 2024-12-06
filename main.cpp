@@ -13,7 +13,7 @@
 #include "inc/celluleobstacle.h"
 
 // Paramètres de la grille
-const float cellSize = 7;
+float Grille::cellSize = 7;
 const int gridWidth = 230;
 const int gridHeight = 120;
 const int buttonAreaHeight = 50; // Hauteur de la zone des boutons
@@ -173,10 +173,30 @@ void mode_window(int argc, char* argv[])
             std::cout << "Taille de la grille : " << grille_->get_largeur() << " x " << grille_->get_longueur() << std::endl;
             // Afficher
 
-            sf::RenderWindow window(sf::VideoMode(grille_->get_largeur() * cellSize, grille_->get_longueur() * cellSize + buttonAreaHeight), "Game of Life");
+            const int minGridSize = 80;
+            int windowWidth;
+            int windowHeight;
+
+            // Ajuster cGrille::ellSize si la grille est plus petite que 50x50
+            if (grille_->get_largeur() < minGridSize || grille_->get_longueur() < minGridSize) {
+                windowWidth = minGridSize * Grille::cellSize;
+                windowHeight = minGridSize * Grille::cellSize + buttonAreaHeight;
+                std::cout << "Ajustement de la taille des cellules ..." << std::endl;
+                std::cout << "Largeur : " << grille_->get_largeur() << " Longueur : " << grille_->get_longueur() << std::endl;
+                float scaleFactor = (float)minGridSize / std::max(grille_->get_largeur(), grille_->get_longueur());
+                Grille::cellSize *= scaleFactor;
+                std::cout << Grille::cellSize << std::endl;
+            }
+            else{
+                windowWidth = grille_->get_largeur() * Grille::cellSize;
+                windowHeight = grille_->get_longueur() * Grille::cellSize + buttonAreaHeight;
+
+            }
+
+            sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Game of Life");
             
             // Mise à jour de la position du bouton
-            int buttonYPosition = grille_->get_longueur() * cellSize + (buttonAreaHeight - 50) / 2; // 50 est la hauteur du bouton
+            int buttonYPosition = grille_->get_longueur() * Grille::cellSize + (buttonAreaHeight - 50) / 2; // 50 est la hauteur du bouton
             Button bouton_pause(10, buttonYPosition, 200, 50, a);
 
             // ... après la création du bouton pause
@@ -331,13 +351,23 @@ void mode_view(int argc, char* argv[])
             //     grille_->update();
             // }
 
-            sf::RenderWindow window(sf::VideoMode(gridWidth * cellSize, gridHeight * cellSize + buttonAreaHeight), "Game of Life");
+            const int minGridSize = 50;
+            int windowWidth = minGridSize * Grille::cellSize;
+            int windowHeight = minGridSize * Grille::cellSize + buttonAreaHeight;
+
+            // Ajuster Grille::cellSize si la grille est plus petite que 50x50
+            if (grille_->get_largeur() < minGridSize || grille_->get_longueur() < minGridSize) {
+                float scaleFactor = (float)minGridSize / std::max(grille_->get_largeur(), grille_->get_longueur());
+                Grille::cellSize *= scaleFactor;
+            }
+
+            sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Game of Life");
             // sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 
             // sf::RenderWindow window;
-            // window.create(sf::VideoMode(gridWidth * cellSize, gridHeight * cellSize + buttonAreaHeight), "Game of Life", sf::Style::Titlebar | sf::Style::Close);
+            // window.create(sf::VideoMode(gridWidth * Grille::cellSize, gridHeight * Grille::cellSize + buttonAreaHeight), "Game of Life", sf::Style::Titlebar | sf::Style::Close);
             // Mise à jour de la position du bouton
-            int buttonYPosition = gridHeight * cellSize + (buttonAreaHeight - 50) / 2; // 50 est la hauteur du bouton
+            int buttonYPosition = gridHeight * Grille::cellSize + (buttonAreaHeight - 50) / 2; // 50 est la hauteur du bouton
             Button bouton_pause(10, buttonYPosition, 200, 50, a);
 
             // ... après la création du bouton pause

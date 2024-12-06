@@ -8,7 +8,6 @@
 #include <cstdlib>
 #include <iostream>
 
-const int cellSize = 7;
 
 Grille::Grille(int longueur, int largeur) : longueur(longueur), largeur(largeur){
     /*
@@ -161,6 +160,7 @@ void Grille::render_grid(sf::RenderWindow &window) {
     for (int y = 0; y < longueur; ++y) {
         for (int x = 0; x < largeur; ++x) {
             // verifier que la cellule est un obstacle
+            // mettre la bonne taille pour la cellule dessinée
             if (CelluleObstacle* obstacle = dynamic_cast<CelluleObstacle*>(grid[y][x])) {
                 cell.setPosition(x * cellSize, y * cellSize);
                 if (grid[y][x]->get_state() == 1) {
